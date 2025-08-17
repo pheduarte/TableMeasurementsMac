@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Table Layout Calculator - Mac</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      input {
+        margin: 5px;
+      }
+      .result {
+        margin-top: 20px;
+        white-space: pre-line;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Table Layout Calculator - Mac</h1>
+
+    <label
+      >Table size (cm): <input type="number" id="tableSize" value="0" /></label
+    ><br />
+    <label
+      >Number of devices:
+      <input type="number" id="numDevices" value="0" /></label
+    ><br />
+    <label
+      >Left margin (cm):
+      <input type="number" id="marginLeft" value="0" /></label
+    ><br />
+    <label
+      >Right margin (cm):
+      <input type="number" id="marginRight" value="0" /></label
+    ><br />
+    <label
+      >Signage before each device (cm):
+      <input type="number" id="signage" value="0" /></label
+    ><br />
+    <label
+      >Gap between signage and device (cm):
+      <input type="number" id="signageGap" value="0" /></label
+    ><br />
+
+    <div id="deviceInputs"></div>
+    <button onclick="generateDeviceInputs()">Set Device Sizes</button><br />
+    <button onclick="calculateLayout()">Calculate Layout</button>
+
+    <div class="result" id="result"></div>
+
+    <script>
+      let numDevices = 0;
+
+      function generateDeviceInputs() {
+        const container = document.getElementById("deviceInputs");
+        container.innerHTML = "";
+        numDevices = parseInt(document.getElementById("numDevices").value);
+        for (let i = 0; i < numDevices; i++) {
+          container.innerHTML += `Device ${
+            i + 1
+          } size (cm): <input type="number" id="device${i}" value="20"><br>`;
+        }
+      }
+
+      function calculateLayout() {
+        const tableSize = parseFloat(
+          document.getElementById("tableSize").value
+        );
+        const marginLeft = parseFloat(
+          document.getElementById("marginLeft").value
+        );
+        const marginRight = parseFloat(
+          document.getElementById("marginRight").value
+        );
+        const signage = parseFloat(document.getElementById("signage").value);
+        const signageGap = parseFloat(
+          document.getElementById("signageGap").value
+        );
+
+        let devices = [];
+        let totalDeviceSize = 0;
+        for (let i = 0; i < numDevices; i++) {
+          const size = parseFloat(document.getElementById("device" + i).value);
+          devices.push(size);
+          totalDeviceSize += size;
+        }
+
+        // Calculate gap between devices
+        let unitGap = 0;
+        if (numDevices > 1) {
+          unitGap =
+            (tableSize -
+              marginLeft -
+              marginRight -
+              totalDeviceSize -
+              signage * numDevices -
+              signageGap * numDevices) /
+            (numDevices - 1);
+        }
+
+        let position = marginLeft;
+        let output = "";
+
+        for (let i = 0; i < numDevices; i++) {
+          // Signage
+          output += `Signage ${i + 1}: ${position.toFixed(2)}cm - ${(
+            position + signage
+          ).toFixed(2)}cm\n`;
+          position += signage;
+
+          // Gap between signage and device
+          output += `Signage-Device Gap ${i + 1}: ${position.toFixed(2)}cm - ${(
+            position + signageGap
+          ).toFixed(2)}cm\n`;
+          position += signageGap;
+
+          // Device
+          output += `Device ${i + 1}: ${position.toFixed(2)}cm - ${(
+            position + devices[i]
+          ).toFixed(2)}cm\n`;
+          position += devices[i];
+
+          // Gap between devices (except last device)
+          if (i < numDevices - 1) {
+            output += `Gap ${i + 1}: ${position.toFixed(2)}cm - ${(
+              position + unitGap
+            ).toFixed(2)}cm\n`;
+            position += unitGap;
+          }
+        }
+
+        output += `Right margin: ${position.toFixed(2)}cm - ${tableSize.toFixed(
+          2
+        )}cm`;
+
+        document.getElementById("result").innerText = output;
+      }
+    </script>
+  </body>
+</html>
